@@ -30,8 +30,22 @@ import type { ClaimResult } from './server/services.ts';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+function getPortFromArgs(): number | null {
+  const idx = process.argv.indexOf('--port');
+  if (idx !== -1 && process.argv[idx + 1]) {
+    const p = Number(process.argv[idx + 1]);
+    if (Number.isFinite(p) && p > 0) return p;
+  }
+  const eq = process.argv.find((a) => a.startsWith('--port='));
+  if (eq) {
+    const p = Number(eq.split('=')[1]);
+    if (Number.isFinite(p) && p > 0) return p;
+  }
+  return null;
+}
+
 const MAX_FILE_BYTES = 20 * 1024 * 1024;
-const PORT = Number(process.env.PORT) || 3000;
+const PORT = Number(process.env.PORT) || getPortFromArgs() || 3000;
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -419,11 +433,13 @@ app.use((err: unknown, req: Request, res: Response, next: NextFunction) => {
 });
 
 // Setup Vite (dev) / Static dist (production)
-const isDev = process.argv.includes('--dev') && process.env.NODE_ENV !== 'production';
+const isDev =
+  process.env.NODE_ENV !== 'production' &&
+  (process.argv.includes('--dev') || process.env.npm_lifecycle_event === 'dev');
 if (isDev) {
   const { createServer: createViteServer } = await import('vite');
   const vite = await createViteServer({
-    server: { middlewareMode: true },
+    server: { middlewareMode: true, hmr: false },
     appType: 'custom',
   });
   app.use(vite.middlewares);
