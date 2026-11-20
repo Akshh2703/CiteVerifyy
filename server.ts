@@ -418,8 +418,9 @@ app.use((err: unknown, req: Request, res: Response, next: NextFunction) => {
   next(err);
 });
 
-// Setup Vite / Static middleware
-if (process.env.NODE_ENV !== 'production') {
+// Setup Vite (dev) / Static dist (production)
+const isDev = process.argv.includes('--dev') && process.env.NODE_ENV !== 'production';
+if (isDev) {
   const { createServer: createViteServer } = await import('vite');
   const vite = await createViteServer({
     server: { middlewareMode: true },
