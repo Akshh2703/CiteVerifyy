@@ -1,0 +1,5 @@
+{
+  "name": "CiteVerify",
+  "description": "Research claim extraction, citation mapping, scholarly paper retrieval, and human-in-the-loop evidence review workspace.",
+  "requestFramePermissions": []
+}
